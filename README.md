@@ -34,10 +34,13 @@
 
 ### Работа с кодом
 `Integer groupID ; // ID группы `
+
 `String adminToken;  // пользовательский ключ доступа`
+
 `String botToken;  // ключ доступа сообщества `
+
 `VK object = new VK(groupID, adminToken, botToken);`
+
 `object.getUpdates(90); // получение обновлений с LongPoll с задержкой 90 секунд`
 
-Фоточки надо добавить?)
 ![](https://pandao.github.io/editor.md/examples/images/4.jpg)

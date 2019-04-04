@@ -1,9 +1,14 @@
 package Entities;
 
 public class Server {
-    String key;
-    String server;
-    String ts;
+    String key, server;
+    Integer ts;
+
+    public Server(String server, String key, Integer ts) {
+        this.server = server;
+        this.key = key;
+        this.ts = ts;
+    }
 
     public void setKey(String key) {
         this.key = key;
@@ -13,7 +18,7 @@ public class Server {
         this.server = server;
     }
 
-    public void setTs(String ts) {
+    public void setTs(Integer ts) {
         this.ts = ts;
     }
 
@@ -25,7 +30,7 @@ public class Server {
         return server;
     }
 
-    public String getTs() {
+    public Integer getTs() {
         return ts;
     }
 }

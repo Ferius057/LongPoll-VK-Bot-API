@@ -2,28 +2,27 @@ package VK;
 
 import Entities.Server;
 import Lib.Request;
-import com.google.gson.GsonBuilder;
+import Objects.Keyboard;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import com.google.gson.Gson;
 import java.util.Objects;
-import static Lib.Converting.convertEncoding;
 
 public class VK {
 
     public Integer groupID;
     public Server srv;
-    public String token;
+    public String userToken;
+    public String botToken;
 
-    public String encoding = "windows-1251";
     public double version = 5.92;
 
-    public VK(Integer groupID, String token) {
+    public VK(Integer groupID, String userToken, String botToken) {
         this.groupID = groupID;
-        this.token = token;
+        this.userToken = userToken;
+        this.botToken = botToken;
 
-        Gson gson = new GsonBuilder().create();
-        this.srv = gson.fromJson(this.getLongPollServer(), Server.class);
+        JSONObject srvTemp = new JSONObject(this.getLongPollServer());
+        this.srv  = new Server(srvTemp.getString("server"), srvTemp.getString("key"), srvTemp.getInt("ts"));
     }
 
     public String getLongPollServer() {
@@ -31,53 +30,84 @@ public class VK {
     }
 
     public String query(String method, String params) {
-        if (token != null) params = "access_token=" + token + "&" + "version=" + version + "&" + params;
+
+        params = "access_token=" + this.userToken + "&" + "version=" + version + "&" + params;
 
         JSONObject object = new JSONObject(
-                Objects.requireNonNull(convertEncoding(
-                        Request.post("https://api.vk.com/method/" + method, params), encoding)
-                )
-        );
+                Objects.requireNonNull(Request.post("https://api.vk.com/method/" + method, params) ) );
 
         return object.getJSONObject("response").toString();
     }
 
-    public String getUpdates(Integer wait) {
+
+    public JSONObject queryFromBot(String method, String params) {
+
+        params = "access_token=" + this.botToken+ "&" + "version=" + version + "&" + params;
+
+        JSONObject object = new JSONObject(
+                Objects.requireNonNull(
+                        Request.post("https://api.vk.com/method/" + method, params) ) );
+
+        if (object.has("error")) {
+            System.out.println(object);
+        }
+
+        return object;
+    }
+
+    public void getUpdates(Integer wait) {
 
         JSONObject json, rec;
         JSONArray updates;
 
         while (true) {
             json = new JSONObject(
-                    Objects.requireNonNull(convertEncoding(
-                            Request.postLongPoll(this.srv.getServer()+ "?act=a_check&key=" + this.srv.getKey() + "&ts=" + this.srv.getTs() + "&wait=" + wait + "&mode=2&version=2"), encoding)
+                    Objects.requireNonNull(
+                            Request.postLongPoll(this.srv.getServer()+ "?act=a_check&key=" + this.srv.getKey() + "&ts=" + this.srv.getTs() + "&wait=" + wait + "&mode=2&version=2")
                     )
             );
 
-            // может быть failed
+
+            if (json.has("failed")) {
+                System.out.println("Response from VK API: failed");
+                return;
+            }
+
             updates = json.getJSONArray("updates");
 
             if (updates.length() != 0) {
-                this.srv.setTs(json.getString("ts"));
-
+                this.srv.setTs(json.getInt("ts"));
                 for (int i = 0; i < updates.length(); ++i) {
-
                     rec = updates.getJSONObject(i);
                     this.parserType(rec.getJSONObject("object"), rec.getString("type"));
                 }
-            } else
-            {
-                return  "closed";
             }
         }
     }
 
     public void parserType(JSONObject object, String type) {
-        System.out.println(type);
         switch (type) {
+            case "message_typing_state":
+                System.out.println("id" + object.getInt("from_id") + " is " + object.getString("state"));
+                break;
             case "message_new":
+                System.out.println("Сообщение «" + object.getString("text") + "» от id" + object.getInt("from_id") + " дата " + new java.util.Date((long)object.getInt("date")*1000));
+
+                if (object.has("reply_message")) {
+                    System.out.println("Есть пересланные сообщения");
+                }
+                if (object.has("payload")){
+                    System.out.println("Пользователь нажал кнопку «" + object.getString("text") + "», с параметром «" + object.getString("payload") + "»");
+                }
+                Keyboard keyboard = new Keyboard(false);
+                keyboard.addButton("text button", "negative", "Красная кнопка");
+                keyboard.addButton("text button", "positive", "Зеленая кнопка");
+                keyboard.addButton("text button", "default", "Белая кнопка");
+                keyboard.addButton("text button", "primary", "Синяя кнопка");
+                this.queryFromBot("messages.send","user_id=" + object.getInt("from_id") + "&message="+ object.getString("text") + " пикачу&keyboard=" + keyboard.getJSON() );
                 break;
             case "message_reply":
+                System.out.println("Ответное сообщение «" + object.getString("text") + "» для id" + object.getInt("peer_id"));
                 break;
             case "message_edit":
                 break;
@@ -108,6 +138,7 @@ public class VK {
             case "video_comment_delete":
                 break;
             case "wall_post_new":
+                System.out.println("Новая запись «" + object.getString("text") + "» дата в UnixTime" + object.getInt("date"));
                 break;
             case "wall_repost":
                 break;
@@ -152,6 +183,7 @@ public class VK {
             case "group_change_photo":
                 break;
         }
-        System.out.println(object);
+        // Вывод содержимого json, которое присылает VK API в ответ на различные действия (см выше)
+//        System.out.println(object);
     }
 }

@@ -13,7 +13,7 @@
 `https://oauth.vk.com/blank.html#access_token=ЗДЕСЬНУЖНЫЙВАМТОКЕН&expires_in=0&user_id=385818590`
 
 #### Второй способ
-- Перейти по этой ссылке: [ссылка](https://oauth.vk.com/authorize?client_id=3116505&scope=wall,offline&redirect_uri=https://oauth.vk.com/blank.html&display=page&response_type=token&revoke=1 "ссылка")
+- Перейти по этой ссылке: [ссылка](https://oauth.vk.com/authorize?client_id=3116505&scope=groups,offline&redirect_uri=https://oauth.vk.com/blank.html&display=page&response_type=token&revoke=1 "ссылка")
 - Разрешить доступ
 - Скопировать с адресной строки **access_token**
 

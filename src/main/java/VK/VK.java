@@ -7,54 +7,75 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.util.Objects;
 
+/**
+ * Класс работы c VK API.
+ * @autor daniilak
+ * @version 1.1
+ */
 public class VK {
 
-    public Integer groupID;
-    public Server srv;
-    public String userToken;
-    public String botToken;
+    /** Поле номер сообщества */
+    private Integer groupID;
 
-    public double version = 5.92;
+    /** Поле объект LongPoll сервера */
+    private Server srv;
 
+    /** Поле пользовательский ключ доступа */
+    private String userToken;
+
+    /** Поле ключ доступа сообщества */
+    private String botToken;
+
+    /** Поле версия API VK */
+    private double version = 5.92;
+
+    /**
+     * Конструктор - создание нового объекта работы с VK API
+     * @param groupID - номер сообщества
+     * @param userToken - пользовательский ключ доступа
+     * @param botToken - ключ доступа сообщества
+     */
     public VK(Integer groupID, String userToken, String botToken) {
+
         this.groupID = groupID;
         this.userToken = userToken;
         this.botToken = botToken;
 
-        JSONObject srvTemp = new JSONObject(this.getLongPollServer());
+        JSONObject srvTemp = this.getLongPollServer();
         this.srv  = new Server(srvTemp.getString("server"), srvTemp.getString("key"), srvTemp.getInt("ts"));
     }
 
-    public String getLongPollServer() {
-        return this.query("groups.getLongPollServer", "group_id=" + this.groupID);
+    /**
+     * Функция получения данных LongPoll сервера VK
+     * @return возвращает JSON строку с данными LongPoll сервера VK
+     */
+    private JSONObject getLongPollServer() {
+        return this.queryFromUser("groups.getLongPollServer", "group_id=" + this.groupID)
+                .getJSONObject("response");
     }
 
-    public String query(String method, String params) {
-
+    /**
+     * Функция получения данных API при помощи пользовательского ключа
+     * @return возвращает JSONObject
+     */
+    public JSONObject queryFromUser(String method, String params) {
         params = "access_token=" + this.userToken + "&" + "version=" + version + "&" + params;
-
-        JSONObject object = new JSONObject(
-                Objects.requireNonNull(Request.post("https://api.vk.com/method/" + method, params) ) );
-
-        return object.getJSONObject("response").toString();
+        return Request.query(method,params);
     }
 
-
+    /**
+     * Функция получения
+     * @return возвращает JSONObject
+     */
     public JSONObject queryFromBot(String method, String params) {
-
         params = "access_token=" + this.botToken+ "&" + "version=" + version + "&" + params;
-
-        JSONObject object = new JSONObject(
-                Objects.requireNonNull(
-                        Request.post("https://api.vk.com/method/" + method, params) ) );
-
-        if (object.has("error")) {
-            System.out.println(object);
-        }
-
-        return object;
+        return Request.query(method,params);
     }
 
+    /**
+     * Функция получения обновлений при помощи LongPoll
+     * @param wait - задержка в секундах
+     */
     public void getUpdates(Integer wait) {
 
         JSONObject json, rec;

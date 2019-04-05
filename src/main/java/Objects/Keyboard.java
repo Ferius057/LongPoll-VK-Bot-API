@@ -4,9 +4,17 @@ import Objects.Button;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+/**
+ * Класс работы с объектом клавиатуры, см. https://vk.com/dev/bots_docs
+ * @autor daniilak
+ * @version 1.1
+ */
 public class Keyboard {
+
     Boolean oneTime;
+
     JSONArray buttons;
+
     JSONArray listButtons;
 
     public Keyboard(Boolean oneTime) {

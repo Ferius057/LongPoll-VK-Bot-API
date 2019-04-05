@@ -106,6 +106,11 @@ public class VK {
         }
     }
 
+    /**
+     * Функция парсера разных типов уведомлений сообщества, см. https://vk.com/dev/groups_events
+     * @param object - JSONObject уведомления
+     * @param type - тип уведомления, см
+     */
     public void parserType(JSONObject object, String type) {
         switch (type) {
             case "message_typing_state":
@@ -120,11 +125,16 @@ public class VK {
                 if (object.has("payload")){
                     System.out.println("Пользователь нажал кнопку «" + object.getString("text") + "», с параметром «" + object.getString("payload") + "»");
                 }
+
+                /** Добавление клавиатуры */
                 Keyboard keyboard = new Keyboard(false);
                 keyboard.addButton("text button", "negative", "Красная кнопка");
                 keyboard.addButton("text button", "positive", "Зеленая кнопка");
                 keyboard.addButton("text button", "default", "Белая кнопка");
                 keyboard.addButton("text button", "primary", "Синяя кнопка");
+
+                /** Отправление запроса "Отправить сообщение" с параметрами в ответ польователю
+                 * вместе с параметром keyboard*/
                 this.queryFromBot("messages.send","user_id=" + object.getInt("from_id") + "&message="+ object.getString("text") + " пикачу&keyboard=" + keyboard.getJSON() );
                 break;
             case "message_reply":

@@ -47,7 +47,7 @@
 
 #### Класс работы с VK API
 
-```
+```java
 package VK;
 
 import Entities.Server;
@@ -273,7 +273,7 @@ public class VK {
 
 #### Класс работы с запросами
 
-```
+```java
 package Lib;
 
 import java.io.*;
@@ -376,7 +376,7 @@ public class Request {
 
 #### Класс работы с данными LongPoll сервера
 
-```
+```java
 package Entities;
 
 /**
@@ -459,7 +459,7 @@ public class Server {
 
 #### Класс работы с объектом клавиатуры, см. https://vk.com/dev/bots_docs
 
-```
+```java
 package Objects;
 
 import Objects.Button;
@@ -514,7 +514,7 @@ public class Keyboard {
 
 #### Класс работы с кнопками клавиатуры, см. https://vk.com/dev/bots_docs
 
-```
+```java
 package Objects;
 
 import org.json.JSONArray;
